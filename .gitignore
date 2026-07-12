@@ -216,3 +216,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Kubernetes
+kubeconfig
+
+# SonarQube
+.scannerwork/
+
+# Docker
+*.tar
+
+# macOS
+.DS_Store
