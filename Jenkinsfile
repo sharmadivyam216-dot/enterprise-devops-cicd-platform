@@ -1,13 +1,11 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        IMAGE_NAME = "divyamsh1316/enterprise-devops-app"
+    }
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+    stages {
 
         stage('Setup Python') {
             steps {
@@ -32,10 +30,40 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t enterprise-devops-app ./app
+                docker build -t $IMAGE_NAME:latest ./app
+                docker tag $IMAGE_NAME:latest $IMAGE_NAME:${BUILD_NUMBER}
                 '''
             }
         }
 
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                    docker push $IMAGE_NAME:latest
+                    docker push $IMAGE_NAME:${BUILD_NUMBER}
+
+                    docker logout
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Docker image successfully pushed to Docker Hub!'
+        }
+
+        failure {
+            echo '❌ Pipeline failed.'
+        }
     }
 }
