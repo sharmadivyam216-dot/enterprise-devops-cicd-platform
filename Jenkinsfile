@@ -7,6 +7,12 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Setup Python') {
             steps {
                 sh '''
@@ -30,8 +36,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t $IMAGE_NAME:latest ./app
-                docker tag $IMAGE_NAME:latest $IMAGE_NAME:${BUILD_NUMBER}
+                docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ./app
                 '''
             }
         }
@@ -47,8 +52,7 @@ pipeline {
                     sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                    docker push $IMAGE_NAME:latest
-                    docker push $IMAGE_NAME:${BUILD_NUMBER}
+                    docker push ${IMAGE_NAME}:${BUILD_NUMBER}
 
                     docker logout
                     '''
@@ -59,11 +63,11 @@ pipeline {
 
     post {
         success {
-            echo '✅ Docker image successfully pushed to Docker Hub!'
+            echo "✅ Pipeline completed successfully!"
         }
 
         failure {
-            echo '❌ Pipeline failed.'
+            echo "❌ Pipeline failed."
         }
     }
 }
