@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: enterprise-devops-service
+
+spec:
+  selector:
+    app: enterprise-devops-app
+
+  type: {{ .Values.service.type }}
+
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
